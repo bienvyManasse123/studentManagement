@@ -27,7 +27,7 @@ class _StatsScreenState extends State<StatsScreen> {
           // Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            padding: const EdgeInsets.fromLTRB(60, 60, 60, 40),
             decoration: const BoxDecoration(
               color: Color(0xFF1A1A2E),
               borderRadius: BorderRadius.only(
