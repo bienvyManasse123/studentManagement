@@ -44,10 +44,11 @@ class _AddEditScreenState extends State<AddEditScreen> {
     try {
       if (widget.etudiant == null) {
         await ApiService.addEtudiant(data);
+        if (mounted) Navigator.pop(context, 'ajoute');
       } else {
         await ApiService.updateEtudiant(widget.etudiant!.numEt, data);
+        if (mounted) Navigator.pop(context, 'modifie');
       }
-      if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +80,7 @@ class _AddEditScreenState extends State<AddEditScreen> {
             // Header identique à HomeScreen
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              padding: const EdgeInsets.fromLTRB(60, 60, 60, 60),
               decoration: const BoxDecoration(
                 color: Color(0xFF1A1A2E),
                 borderRadius: BorderRadius.only(

@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/etudiant.dart';
 
 class ApiService {
-  // Remplacer par l'IP de votre machine si besoin
-  static const String baseUrl = 'http://localhost:8000';
+  // Remplacer par l'IP de votre machine
+  static const String baseUrl = 'http://192.168.0.100:8000';
 
   // GET tous les étudiants
   static Future<List<Etudiant>> getEtudiants() async {

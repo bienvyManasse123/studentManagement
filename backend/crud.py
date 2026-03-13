@@ -4,7 +4,7 @@ from models import Etudiant
 from schemas import EtudiantCreate, EtudiantUpdate
 
 def get_all(db: Session):
-    return db.query(Etudiant).all()
+    return db.query(Etudiant).order_by(Etudiant.numEt.desc()).all()
 
 def get_one(db: Session, numEt: int):
     return db.query(Etudiant).filter(Etudiant.numEt == numEt).first()

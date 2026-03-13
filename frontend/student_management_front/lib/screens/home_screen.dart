@@ -44,7 +44,39 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
  
-  Future<void> _delete(Etudiant e) async {
+  void _showSnackBar(String type) {
+    final config = {
+      'ajoute': {
+        'message': 'Étudiant ajouté avec succès',
+        'color': Colors.green.shade500,
+        'icon': Icons.check_circle,
+      },
+      'modifie': {
+        'message': 'Étudiant modifié avec succès',
+        'color': Colors.blue.shade500,
+        'icon': Icons.edit,
+      },
+    };
+    final c = config[type]!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(c['icon'] as IconData, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(c['message'] as String),
+          ],
+        ),
+        backgroundColor: c['color'] as Color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+ 
+  Future<void> delete(Etudiant e) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -151,16 +183,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      padding: const EdgeInsets.fromLTRB(60, 60, 60, 60),
       decoration: const BoxDecoration(
         color: Color(0xFF1A1A2E),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+          bottomLeft: Radius.circular(50),
+          bottomRight: Radius.circular(50),
         ),
       ),
       child: const Text(
-        'Student Management',
+        'Gestion Étudiants',
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.white,
@@ -176,9 +208,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final admis = s['admis'] as int;
     final redoublants = s['redoublants'] as int;
     final total = s['total'] as int;
-    final moyMin = (s['moyenne_min'] as num).toStringAsFixed(0);
-    final moyMoy = (s['moyenne_classe'] as num).toStringAsFixed(0);
-    final moyMax = (s['moyenne_max'] as num).toStringAsFixed(0);
+    final moyMin = (s['moyenne_min'] as num).toStringAsFixed(2);
+    final moyMoy = (s['moyenne_classe'] as num).toStringAsFixed(2);
+    final moyMax = (s['moyenne_max'] as num).toStringAsFixed(2);
  
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -186,21 +218,21 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              _statCard('$admis', 'Total Elève Admis', Color(0xFF1A1A2E)),
+              _statCard('$admis', 'Admis', Colors.green.shade400,),
               const SizedBox(width: 10),
-              _statCard('$redoublants', 'Total Elève Redoublant', Color(0xFF1A1A2E)),
+              _statCard('$redoublants', 'Redoublants', Colors.red.shade400),
               const SizedBox(width: 10),
-              _statCard('$total', 'Total Elève', Color(0xFF1A1A2E)),
+              _statCard('$total', 'Total Étudiants', Colors.grey.shade600),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              _statCard(moyMin, 'Moyenne . Min', Color(0xFF1A1A2E)),
+              _statCard(moyMin, 'Moyenne . Min', Colors.grey.shade600),
               const SizedBox(width: 10),
-              _statCard(moyMoy, 'Moyenne . Moyen', Color(0xFF1A1A2E)),
+              _statCard(moyMoy, 'Moy . Moyen', Colors.grey.shade600),
               const SizedBox(width: 10),
-              _statCard(moyMax, 'Moyenne . Max', Color(0xFF1A1A2E)),
+              _statCard(moyMax, 'Moyenne . Max', Colors.grey.shade600),
             ],
           ),
         ],
@@ -289,17 +321,36 @@ class _HomeScreenState extends State<HomeScreen> {
             );
             if (ok == true) {
               await ApiService.deleteEtudiant(e.numEt);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.delete, color: Colors.white),
+                        const SizedBox(width: 10),
+                        Text('${e.nomEt} supprimé avec succès'),
+                      ],
+                    ),
+                    backgroundColor: Colors.red.shade400,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
               _load();
             }
             return false; // on gère nous-mêmes via _load()
           } else {
             // Glisse droite = modifier
-            await Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (_) => AddEditScreen(etudiant: e)),
             );
             _load();
+            if (result != null && mounted) _showSnackBar(result);
             return false;
           }
         },
@@ -374,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Note Math: ${e.noteMath}, Note Physique: ${e.notePhys}',
+              'Note Math: ${e.noteMath} | Note Physique: ${e.notePhys}',
               style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 4),
@@ -442,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
  
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20, left: 95, right: 95),
+      padding: const EdgeInsets.only(bottom: 20, left: 78, right: 78),
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Container(
@@ -463,13 +514,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: List.generate(items.length, (index) {
                   final isActive = activeIndex == index;
                   return GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (index == 1) {
-                        Navigator.push(
+                        final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (_) => const AddEditScreen()),
-                        ).then((_) => _load());
+                        );
+                        _load();
+                        if (result != null && mounted) _showSnackBar(result);
                       } else if (index == 2 && _stats == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -481,15 +534,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     behavior: HitTestBehavior.opaque,
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
+                      duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: isActive
                             ? Colors.white.withOpacity(0.15)
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(50),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -499,13 +552,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ? items[index]['activeIcon'] as IconData
                                 : items[index]['icon'] as IconData,
                             color: isActive ? Colors.white : Colors.white38,
-                            size: 22,
+                            size: 25,
                           ),
                           const SizedBox(height: 3),
                           Text(
                             items[index]['label'] as String,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: isActive
                                   ? FontWeight.w600
                                   : FontWeight.w400,
@@ -520,6 +573,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-      );
+    );
   }
 }
